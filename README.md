@@ -43,3 +43,14 @@ bun start
 ```
 
 Access the dashboard at: `http://localhost:8844`
+
+## Desktop & Omarchy Launcher
+
+The project is integrated directly into the **Omarchy Desktop Environment**:
+- **Application Launcher (Super key / Walker):** Search `Network Analytics` or `vnStat`.
+- **Omarchy Menu:** Available under `trigger.network-analytics`.
+- **Direct CLI Launcher:**
+  ```bash
+  ~/.local/bin/omarchy-network-analytics
+  ```
+The launcher automatically checks if the server is running, boots it in the background via Bun if needed, and opens the dashboard in Google Chrome.
