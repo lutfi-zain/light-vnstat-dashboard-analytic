@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Environment and local overrides
+.env
+.env.local
+
+# Logs and temporary files
+*.log
+tmp/
+.DS_Store

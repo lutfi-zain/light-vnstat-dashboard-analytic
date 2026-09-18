@@ -1,0 +1,13 @@
+{
+  "name": "light-vnstat-dashboard-analytic",
+  "version": "1.0.0",
+  "description": "Ultra-minimalist, single-file network telemetry & analytics dashboard for vnStat and Linux kernel counters",
+  "type": "module",
+  "scripts": {
+    "start": "bun server.ts",
+    "dev": "bun --watch server.ts"
+  },
+  "keywords": ["vnstat", "network", "analytics", "dashboard", "minimalist", "bun"],
+  "author": "Lutfi Zain",
+  "license": "MIT"
+}
