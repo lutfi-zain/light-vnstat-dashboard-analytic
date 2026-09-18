@@ -47,6 +47,28 @@ function sampleProcNetDev(): void {
 sampleProcNetDev();
 setInterval(sampleProcNetDev, 2000);
 
+// Idle Auto-Shutdown Engine
+const IDLE_TIMEOUT_MS = 15000;
+const BOOT_GRACE_PERIOD_MS = 45000;
+const bootTime = Date.now();
+let lastClientActivity = Date.now();
+let hasReceivedFirstClient = false;
+
+setInterval(() => {
+  const now = Date.now();
+  if (!hasReceivedFirstClient) {
+    if (now - bootTime > BOOT_GRACE_PERIOD_MS) {
+      console.log(`[Auto-Shutdown] No browser client connected within ${BOOT_GRACE_PERIOD_MS / 1000}s grace period. Terminating.`);
+      process.exit(0);
+    }
+  } else {
+    if (now - lastClientActivity > IDLE_TIMEOUT_MS) {
+      console.log(`[Auto-Shutdown] No active browser detected for ${IDLE_TIMEOUT_MS / 1000}s. Terminating server to release memory.`);
+      process.exit(0);
+    }
+  }
+}, 3000);
+
 function getVnstatData() {
   sampleProcNetDev();
   try {
@@ -2409,9 +2431,16 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
       });
     }
 
-    // Initial Load & Auto Refresh every 10 seconds
+    // Initial Load & Auto Refresh every 5 seconds
     fetchTelemetry();
-    setInterval(() => fetchTelemetry(false), 10000);
+    setInterval(() => fetchTelemetry(false), 5000);
+
+    // Send leave signal on browser close/tab close
+    window.addEventListener('beforeunload', () => {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/leave');
+      }
+    });
   </script>
 </body>
 </html>
@@ -2430,6 +2459,8 @@ const server = Bun.serve({
     }
 
     if (url.pathname === "/api/stats") {
+      hasReceivedFirstClient = true;
+      lastClientActivity = Date.now();
       const telemetry = getVnstatData();
       return new Response(JSON.stringify(telemetry), {
         headers: {
@@ -2437,6 +2468,12 @@ const server = Bun.serve({
           "Access-Control-Allow-Origin": "*"
         }
       });
+    }
+
+    if (url.pathname === "/api/leave") {
+      // Fast-forward idle timeout when tab is closed
+      lastClientActivity = Date.now() - 11000;
+      return new Response("OK");
     }
 
     return new Response("Not Found", { status: 404 });
